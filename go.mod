@@ -3,7 +3,6 @@ module github.com/citadel-corp/cats-social
 go 1.22.0
 
 require (
-	github.com/aws/aws-sdk-go v1.51.1
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang-migrate/migrate/v4 v4.17.0
@@ -12,14 +11,14 @@ require (
 	golang.org/x/crypto v0.21.0
 )
 
+require github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
+
 require (
-	github.com/google/uuid v1.6.0
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/lmittmann/tint v1.0.4
 	github.com/matoous/go-nanoid/v2 v2.0.0
