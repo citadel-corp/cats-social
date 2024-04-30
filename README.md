@@ -1,4 +1,4 @@
-# citadel-corp/go-project-template
+# citadel-corp/cats-social
 
 I'm Commander Shepard, and This Is My Favorite 'Templates for [citadel corp][citadel-corp]'s go projects' on the Citadel
 
@@ -65,8 +65,8 @@ details
   - Acknowledge someone/something.
 
 [citadel-corp]: https://github.com/citadel-corp
-[repository]: https://github.com/citadel-corp/go-project-template
-[mit-license]: https://github.com/citadel-corp/go-project-template?tab=MIT-1-ov-file
-[license-file]: https://github.com/citadel-corp/go-project-template/blob/main/LICENSE
+[repository]: https://github.com/citadel-corp/cats-social
+[mit-license]: https://github.com/citadel-corp/cats-social?tab=MIT-1-ov-file
+[license-file]: https://github.com/citadel-corp/cats-social/blob/main/LICENSE
 [test-url]: TBA.
 [documentation-url]: TBA.

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/citadel-corp/go-project-template/internal/common/db"
+	"github.com/citadel-corp/cats-social/internal/common/db"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
