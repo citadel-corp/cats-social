@@ -12,12 +12,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/citadel-corp/cats-social/internal/common/db"
 	"github.com/citadel-corp/cats-social/internal/common/middleware"
-	"github.com/citadel-corp/cats-social/internal/image"
 	"github.com/citadel-corp/cats-social/internal/user"
 	"github.com/gorilla/mux"
 	"github.com/lmittmann/tint"
@@ -59,18 +55,6 @@ func main() {
 	userService := user.NewService(userRepository)
 	userHandler := user.NewHandler(userService)
 
-	// initialize image domain
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("ap-southeast-1"),
-		Credentials: credentials.NewStaticCredentials(os.Getenv("S3_ID"), os.Getenv("S3_SECRET_KEY"), ""),
-	})
-	if err != nil {
-		slog.Error(fmt.Sprintf("Cannot create AWS session: %v", err))
-		os.Exit(1)
-	}
-	imageService := image.NewService(sess)
-	imageHandler := image.NewHandler(imageService)
-
 	r := mux.NewRouter()
 	r.Use(middleware.Logging)
 	r.Use(middleware.PanicRecoverer)
@@ -85,10 +69,6 @@ func main() {
 	ur := v1.PathPrefix("/user").Subrouter()
 	ur.HandleFunc("/register", userHandler.CreateUser).Methods(http.MethodPost)
 	ur.HandleFunc("/login", userHandler.Login).Methods(http.MethodPost)
-
-	// image routes
-	ir := v1.PathPrefix("/image").Subrouter()
-	ir.HandleFunc("", middleware.Authorized(imageHandler.UploadToS3)).Methods(http.MethodPost)
 
 	httpServer := &http.Server{
 		Addr:     ":8000",
