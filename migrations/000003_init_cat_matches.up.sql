@@ -2,11 +2,11 @@ CREATE TYPE cat_matches_approval AS ENUM('approved', 'rejected', 'pending');
 
 CREATE TABLE IF NOT EXISTS
 cat_matches(
-    id SERIAL PRIMARY KEY,
-    issuer_user_id INT NOT NULL,
-		issuer_cat_id INT NOT NULL,
-		matched_user_id INT NOT NULL,
-		matched_cat_id INT NOT NULL,
+    id CHAR(16) PRIMARY KEY,
+    issuer_user_id CHAR(16) NOT NULL,
+		issuer_cat_id CHAR(16) NOT NULL,
+		matched_user_id CHAR(16) NOT NULL,
+		matched_cat_id CHAR(16) NOT NULL,
 		approval_status cats_match_approval NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT current_timestamp
     CONSTRAINT fk_issuer_user_id

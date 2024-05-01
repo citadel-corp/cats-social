@@ -5,8 +5,8 @@ CREATE TYPE cats_sex AS ENUM('Female', 'Male');
 
 CREATE TABLE IF NOT EXISTS
 cats (
-    id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
+    id CHAR(16) PRIMARY KEY,
+    user_id CHAR(16) NOT NULL,
     name VARCHAR NOT NULL,
 		race cats_race NOT NULL,
 		sex cats_sex NOT NULL,
