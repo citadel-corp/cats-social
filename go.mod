@@ -19,7 +19,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
-	github.com/lib/pq v1.10.9 // indirect
+	github.com/lib/pq v1.10.9
 	github.com/lmittmann/tint v1.0.4
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	go.uber.org/atomic v1.7.0 // indirect
