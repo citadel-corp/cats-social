@@ -9,6 +9,7 @@ import (
 
 type Service interface {
 	Create(ctx context.Context, req CreateCatPayload, userID string) (*CreateCatResponse, error)
+	Delete(ctx context.Context, id string, userID string) error
 }
 
 type userService struct {
@@ -43,4 +44,9 @@ func (s *userService) Create(ctx context.Context, req CreateCatPayload, userID s
 		Id:        cat.ID,
 		CreatedAt: cat.CreatedAt,
 	}, nil
+}
+
+// Delete implements Service.
+func (s *userService) Delete(ctx context.Context, id string, userID string) error {
+	return s.repository.Delete(ctx, id, userID)
 }
