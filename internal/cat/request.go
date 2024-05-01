@@ -12,7 +12,7 @@ var imgUrlValidationRule = validation.NewStringRule(func(s string) bool {
 	return match
 }, "image url is not valid")
 
-type CreateCatPayload struct {
+type CreateUpdateCatPayload struct {
 	Name        string   `json:"name"`
 	Race        string   `json:"race"`
 	Sex         string   `json:"sex"`
@@ -21,7 +21,7 @@ type CreateCatPayload struct {
 	ImageURLS   []string `json:"imageUrls"`
 }
 
-func (p CreateCatPayload) Validate() error {
+func (p CreateUpdateCatPayload) Validate() error {
 	for i := range p.ImageURLS {
 		if len(p.ImageURLS[i]) == 0 {
 			return errors.New("tags must not be empty")

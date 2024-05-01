@@ -26,7 +26,7 @@ func (h *Handler) CreateCat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req CreateCatPayload
+	var req CreateUpdateCatPayload
 
 	err = request.DecodeJSON(w, r, &req)
 	if err != nil {
@@ -54,6 +54,52 @@ func (h *Handler) CreateCat(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusCreated, response.ResponseBody{
 		Message: "success",
 		Data:    catResp,
+	})
+}
+
+func (h *Handler) UpdateCat(w http.ResponseWriter, r *http.Request) {
+	userID, err := getUserID(r)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, response.ResponseBody{})
+		return
+	}
+
+	var req CreateUpdateCatPayload
+
+	err = request.DecodeJSON(w, r, &req)
+	if err != nil {
+		response.JSON(w, http.StatusBadRequest, response.ResponseBody{
+			Message: "Failed to decode JSON",
+			Error:   err.Error(),
+		})
+		return
+	}
+	params := mux.Vars(r)
+	id := params["id"]
+	err = h.service.Update(r.Context(), req, id, userID)
+	if errors.Is(err, ErrValidationFailed) || errors.Is(err, ErrCatHasMatched) {
+		response.JSON(w, http.StatusBadRequest, response.ResponseBody{
+			Message: "Bad request",
+			Error:   err.Error(),
+		})
+		return
+	}
+	if errors.Is(err, ErrCatNotFound) {
+		response.JSON(w, http.StatusNotFound, response.ResponseBody{
+			Message: "Not found",
+			Error:   err.Error(),
+		})
+		return
+	}
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, response.ResponseBody{
+			Message: "Internal server error",
+			Error:   err.Error(),
+		})
+		return
+	}
+	response.JSON(w, http.StatusCreated, response.ResponseBody{
+		Message: "success",
 	})
 }
 

@@ -7,6 +7,7 @@ cat_matches(
 		issuer_cat_id CHAR(16) NOT NULL,
 		matched_user_id CHAR(16) NOT NULL,
 		matched_cat_id CHAR(16) NOT NULL,
+		message VARCHAR(120) NOT NULL,
 		approval_status cats_match_approval NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT current_timestamp
     CONSTRAINT fk_issuer_user_id

@@ -8,7 +8,8 @@ import (
 )
 
 type Service interface {
-	Create(ctx context.Context, req CreateCatPayload, userID string) (*CreateCatResponse, error)
+	Create(ctx context.Context, req CreateUpdateCatPayload, userID string) (*CreateCatResponse, error)
+	Update(ctx context.Context, req CreateUpdateCatPayload, id string, userID string) error
 	Delete(ctx context.Context, id string, userID string) error
 }
 
@@ -20,7 +21,7 @@ func NewService(repository Repository) Service {
 	return &userService{repository: repository}
 }
 
-func (s *userService) Create(ctx context.Context, req CreateCatPayload, userID string) (*CreateCatResponse, error) {
+func (s *userService) Create(ctx context.Context, req CreateUpdateCatPayload, userID string) (*CreateCatResponse, error) {
 	err := req.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrValidationFailed, err)
@@ -44,6 +45,36 @@ func (s *userService) Create(ctx context.Context, req CreateCatPayload, userID s
 		Id:        cat.ID,
 		CreatedAt: cat.CreatedAt,
 	}, nil
+}
+
+// Update implements Service.
+func (s *userService) Update(ctx context.Context, req CreateUpdateCatPayload, id string, userID string) error {
+	err := req.Validate()
+	if err != nil {
+		return fmt.Errorf("%w: %w", ErrValidationFailed, err)
+	}
+	cat, err := s.repository.GetByIDAndUserID(ctx, id, userID)
+	if err != nil {
+		return err
+	}
+
+	if string(cat.Sex) != req.Sex && cat.HasMatched {
+		return ErrCatHasMatched
+	}
+
+	cat = &Cat{
+		ID:          id,
+		UserID:      userID,
+		Name:        req.Name,
+		Race:        CatRace(req.Race),
+		Sex:         CatSex(req.Sex),
+		Age:         req.AgeInMonth,
+		Description: req.Description,
+		HasMatched:  cat.HasMatched,
+		ImageURLS:   req.ImageURLS,
+	}
+	return s.repository.Update(ctx, cat)
+
 }
 
 // Delete implements Service.
