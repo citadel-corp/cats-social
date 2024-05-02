@@ -33,7 +33,7 @@ func (d *dbRepository) GetByIDAndUserID(ctx context.Context, id string, userID s
 	`
 	row := d.db.DB().QueryRowContext(ctx, getUserQuery, id, userID)
 	cat := &Cat{}
-	err := row.Scan(&cat.ID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), cat.CreatedAt)
+	err := row.Scan(&cat.ID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), &cat.CreatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrCatNotFound
 	}
