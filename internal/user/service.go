@@ -43,7 +43,7 @@ func (s *userService) Create(ctx context.Context, req CreateUserPayload) (*UserR
 		return nil, err
 	}
 	// create access token with signed jwt
-	accessToken, err := jwt.Sign(time.Minute*2, fmt.Sprint(user.ID))
+	accessToken, err := jwt.Sign(time.Hour*8, fmt.Sprint(user.ID))
 	if err != nil {
 		return nil, err
 	}

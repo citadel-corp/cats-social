@@ -3,7 +3,7 @@ CREATE TYPE cats_race AS ENUM('Persian', 'Maine Coon', 'Siamese', 'Ragdoll',
 'Bengal', 'Sphynx', 'British Shorthair', 'Abyssinian', 'Scottish Fold', 'Birman');
 
 DROP TYPE IF EXISTS cats_sex;
-CREATE TYPE cats_sex AS ENUM('Female', 'Male');
+CREATE TYPE cats_sex AS ENUM('female', 'male');
 
 CREATE TABLE IF NOT EXISTS
 cats (
@@ -20,7 +20,7 @@ cats (
 );
 
 ALTER TABLE cats
-	ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES cats(id) ON DELETE CASCADE;
+	ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 CREATE INDEX IF NOT EXISTS cats_name
 	ON cats (name);

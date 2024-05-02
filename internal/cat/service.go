@@ -3,6 +3,7 @@ package cat
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/citadel-corp/cats-social/internal/common/id"
 )
@@ -37,7 +38,7 @@ func (s *userService) Create(ctx context.Context, req CreateUpdateCatPayload, us
 		HasMatched:  false,
 		ImageURLS:   req.ImageURLS,
 	}
-	err = s.repository.Create(ctx, cat)
+	cat, err = s.repository.Create(ctx, cat)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +59,7 @@ func (s *userService) Update(ctx context.Context, req CreateUpdateCatPayload, id
 		return err
 	}
 
-	if string(cat.Sex) != req.Sex && cat.HasMatched {
+	if cat.Sex != req.Sex && cat.HasMatched {
 		return ErrCatHasMatched
 	}
 
@@ -66,8 +67,8 @@ func (s *userService) Update(ctx context.Context, req CreateUpdateCatPayload, id
 		ID:          id,
 		UserID:      userID,
 		Name:        req.Name,
-		Race:        CatRace(req.Race),
-		Sex:         CatSex(req.Sex),
+		Race:        req.Race,
+		Sex:         CatSex(strings.ToLower(string(req.Sex))),
 		Age:         req.AgeInMonth,
 		Description: req.Description,
 		HasMatched:  cat.HasMatched,

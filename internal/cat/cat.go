@@ -22,8 +22,8 @@ const (
 )
 
 var (
-	CatRaces []CatRace = []CatRace{Persian, MaineCoon, Siamese, Ragdoll, Bengal, Sphynx, BritishShorthair, Abyssinian, ScottishFold, Birman}
-	CatSexes []CatSex  = []CatSex{Male, Female}
+	CatRaces []interface{} = []interface{}{Persian, MaineCoon, Siamese, Ragdoll, Bengal, Sphynx, BritishShorthair, Abyssinian, ScottishFold, Birman}
+	CatSexes []interface{} = []interface{}{Male, Female}
 )
 
 type Cat struct {
