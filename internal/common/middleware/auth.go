@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/citadel-corp/cats-social/internal/common/jwt"
@@ -32,6 +33,7 @@ func Authorized(next func(w http.ResponseWriter, r *http.Request)) func(w http.R
 
 		subject, err := jwt.VerifyAndGetSubject(tokenString)
 		if err != nil {
+			fmt.Println("err authorized=", err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}

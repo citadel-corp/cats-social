@@ -11,7 +11,7 @@ import (
 
 type Repository interface {
 	GetByIDAndUserID(ctx context.Context, id string, userID string) (*Cat, error)
-	Create(ctx context.Context, cat *Cat) error
+	Create(ctx context.Context, cat *Cat) (*Cat, error)
 	Update(ctx context.Context, cat *Cat) error
 	Delete(ctx context.Context, id string, userID string) error
 }
@@ -44,17 +44,23 @@ func (d *dbRepository) GetByIDAndUserID(ctx context.Context, id string, userID s
 }
 
 // Create implements Repository.
-func (d *dbRepository) Create(ctx context.Context, cat *Cat) error {
+func (d *dbRepository) Create(ctx context.Context, cat *Cat) (*Cat, error) {
 	createCatQuery := `
 		INSERT INTO cats (
 			id, user_id, name, race, sex, age_in_month, description, has_matched, image_urls
 		) VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8, $9
-		);
+		) RETURNING id, created_at;
 	`
-	_, err := d.db.DB().ExecContext(ctx, createCatQuery,
+	row := d.db.DB().QueryRowContext(ctx, createCatQuery,
 		cat.ID, cat.UserID, cat.Name, cat.Race, cat.Sex, cat.Age, cat.Description, cat.HasMatched, pq.Array(cat.ImageURLS))
-	return err
+	c := &Cat{}
+	err := row.Scan(&c.ID, &c.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
 }
 
 // Update implements Repository.
