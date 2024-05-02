@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/citadel-corp/cats-social/internal/cat"
 	"github.com/citadel-corp/cats-social/internal/common/db"
 	"github.com/citadel-corp/cats-social/internal/common/middleware"
 	"github.com/citadel-corp/cats-social/internal/user"
@@ -55,6 +56,11 @@ func main() {
 	userService := user.NewService(userRepository)
 	userHandler := user.NewHandler(userService)
 
+	// initialize cat domain
+	catRepository := cat.NewRepository(db)
+	catService := cat.NewService(catRepository)
+	catHandler := cat.NewHandler(catService)
+
 	r := mux.NewRouter()
 	r.Use(middleware.Logging)
 	r.Use(middleware.PanicRecoverer)
@@ -69,6 +75,12 @@ func main() {
 	ur := v1.PathPrefix("/user").Subrouter()
 	ur.HandleFunc("/register", userHandler.CreateUser).Methods(http.MethodPost)
 	ur.HandleFunc("/login", userHandler.Login).Methods(http.MethodPost)
+
+	// cat management routes
+	cr := v1.PathPrefix("/cat").Subrouter()
+	cr.HandleFunc("", middleware.Authorized(catHandler.CreateCat)).Methods(http.MethodPost)
+	cr.HandleFunc("/{id}", middleware.Authorized(catHandler.UpdateCat)).Methods(http.MethodPut)
+	cr.HandleFunc("/{id}", middleware.Authorized(catHandler.DeleteCat)).Methods(http.MethodDelete)
 
 	httpServer := &http.Server{
 		Addr:     ":8000",

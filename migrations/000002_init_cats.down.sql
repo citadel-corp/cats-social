@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS cats;
+DROP TYPE IF EXISTS cats_race;
+DROP TYPE IF EXISTS cats_sex;
