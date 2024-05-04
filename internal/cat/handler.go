@@ -130,7 +130,7 @@ func (h *Handler) UpdateCat(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	response.JSON(w, http.StatusCreated, response.ResponseBody{
+	response.JSON(w, http.StatusOK, response.ResponseBody{
 		Message: "success",
 	})
 }
