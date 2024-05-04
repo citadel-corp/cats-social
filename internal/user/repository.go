@@ -27,12 +27,12 @@ func NewRepository(db *db.DB) Repository {
 func (d *dbRepository) Create(ctx context.Context, user *User) error {
 	createUserQuery := `
 		INSERT INTO users (
-			id, email, name, hashed_password
+			uid, email, name, hashed_password
 		) VALUES (
 			$1, $2, $3, $4
 		);
 	`
-	_, err := d.db.DB().ExecContext(ctx, createUserQuery, user.ID, user.Email, user.Name, user.HashedPassword)
+	_, err := d.db.DB().ExecContext(ctx, createUserQuery, user.UID, user.Email, user.Name, user.HashedPassword)
 	var pgErr *pgconn.PgError
 	if err != nil {
 		if errors.As(err, &pgErr) {
@@ -50,12 +50,12 @@ func (d *dbRepository) Create(ctx context.Context, user *User) error {
 
 func (d *dbRepository) GetByEmail(ctx context.Context, email string) (*User, error) {
 	getUserQuery := `
-		SELECT id, email, name, hashed_password FROM users
+		SELECT id, uid, email, name, hashed_password FROM users
 		WHERE email = $1;
 	`
 	row := d.db.DB().QueryRowContext(ctx, getUserQuery, email)
 	u := &User{}
-	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.HashedPassword)
+	err := row.Scan(&u.ID, &u.UID, &u.Email, &u.Name, &u.HashedPassword)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrUserNotFound
 	}
@@ -67,12 +67,12 @@ func (d *dbRepository) GetByEmail(ctx context.Context, email string) (*User, err
 
 func (d *dbRepository) GetByID(ctx context.Context, id uint64) (*User, error) {
 	getUserQuery := `
-		SELECT id, email, name, product_sold_total, hashed_password FROM users
-		WHERE id = $1;
+		SELECT id, uid, email, name, product_sold_total, hashed_password FROM users
+		WHERE uid = $1;
 	`
 	row := d.db.DB().QueryRowContext(ctx, getUserQuery, id)
 	u := &User{}
-	err := row.Scan(&u.ID, &u.Email, &u.Name, &u.HashedPassword)
+	err := row.Scan(&u.ID, &u.UID, &u.Email, &u.Name, &u.HashedPassword)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrUserNotFound
 	}
