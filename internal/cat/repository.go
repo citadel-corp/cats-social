@@ -10,10 +10,10 @@ import (
 )
 
 type Repository interface {
-	GetByIDAndUserID(ctx context.Context, id string, userID string) (*Cat, error)
+	GetByUIDAndUserID(ctx context.Context, id string, userID int) (*Cat, error)
 	Create(ctx context.Context, cat *Cat) (*Cat, error)
 	Update(ctx context.Context, cat *Cat) error
-	Delete(ctx context.Context, id string, userID string) error
+	Delete(ctx context.Context, id string, userID int) error
 }
 
 type dbRepository struct {
@@ -25,15 +25,15 @@ func NewRepository(db *db.DB) Repository {
 }
 
 // GetByIDAndUserID implements Repository.
-func (d *dbRepository) GetByIDAndUserID(ctx context.Context, id string, userID string) (*Cat, error) {
+func (d *dbRepository) GetByUIDAndUserID(ctx context.Context, uid string, userID int) (*Cat, error) {
 	getUserQuery := `
-		SELECT id, user_id, name, race, sex, age_in_month, description, has_matched, image_urls, created_at
+		SELECT uid, user_id, name, race, sex, age_in_month, description, has_matched, image_urls, created_at
 		FROM cats
-		WHERE id = $1 AND user_id = $2;
+		WHERE uid = $1 AND user_id = $2;
 	`
-	row := d.db.DB().QueryRowContext(ctx, getUserQuery, id, userID)
+	row := d.db.DB().QueryRowContext(ctx, getUserQuery, uid, userID)
 	cat := &Cat{}
-	err := row.Scan(&cat.ID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), &cat.CreatedAt)
+	err := row.Scan(&cat.UID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), &cat.CreatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrCatNotFound
 	}
@@ -47,15 +47,15 @@ func (d *dbRepository) GetByIDAndUserID(ctx context.Context, id string, userID s
 func (d *dbRepository) Create(ctx context.Context, cat *Cat) (*Cat, error) {
 	createCatQuery := `
 		INSERT INTO cats (
-			id, user_id, name, race, sex, age_in_month, description, has_matched, image_urls
+			uid, user_id, name, race, sex, age_in_month, description, has_matched, image_urls
 		) VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8, $9
-		) RETURNING id, created_at;
+		) RETURNING uid, created_at;
 	`
 	row := d.db.DB().QueryRowContext(ctx, createCatQuery,
-		cat.ID, cat.UserID, cat.Name, cat.Race, cat.Sex, cat.Age, cat.Description, cat.HasMatched, pq.Array(cat.ImageURLS))
+		cat.UID, cat.UserID, cat.Name, cat.Race, cat.Sex, cat.Age, cat.Description, cat.HasMatched, pq.Array(cat.ImageURLS))
 	c := &Cat{}
-	err := row.Scan(&c.ID, &c.CreatedAt)
+	err := row.Scan(&c.UID, &c.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -74,9 +74,9 @@ func (d *dbRepository) Update(ctx context.Context, cat *Cat) error {
 		description = $5,
 		has_matched = $6,
 		image_urls = $7
-		WHERE id = $8 AND user_id = $9
+		WHERE uid = $8 AND user_id = $9
 	`
-	err := d.db.DB().QueryRowContext(ctx, updateQuery, cat.Name, cat.Race, cat.Sex, cat.Age, cat.Description, cat.HasMatched, pq.Array(cat.ImageURLS), cat.ID, cat.UserID).Err()
+	_, err := d.db.DB().ExecContext(ctx, updateQuery, cat.Name, cat.Race, cat.Sex, cat.Age, cat.Description, cat.HasMatched, pq.Array(cat.ImageURLS), cat.UID, cat.UserID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return ErrCatNotFound
 	}
@@ -84,12 +84,12 @@ func (d *dbRepository) Update(ctx context.Context, cat *Cat) error {
 }
 
 // Delete implements Repository.
-func (d *dbRepository) Delete(ctx context.Context, id string, userID string) error {
+func (d *dbRepository) Delete(ctx context.Context, uid string, userID int) error {
 	deleteCatQuery := `
 		DELETE FROM cats
-		WHERE id = $1 and user_id = $2;
+		WHERE uid = $1 and user_id = $2;
 	`
-	row, err := d.db.DB().ExecContext(ctx, deleteCatQuery, id, userID)
+	row, err := d.db.DB().ExecContext(ctx, deleteCatQuery, uid, userID)
 	if err != nil {
 		return err
 	}

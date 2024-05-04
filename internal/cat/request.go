@@ -24,7 +24,7 @@ type CreateUpdateCatPayload struct {
 func (p CreateUpdateCatPayload) Validate() error {
 	for i := range p.ImageURLS {
 		if len(p.ImageURLS[i]) == 0 {
-			return errors.New("tags must not be empty")
+			return errors.New("image urls must not be empty")
 		}
 	}
 	return validation.ValidateStruct(&p,
