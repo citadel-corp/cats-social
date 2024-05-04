@@ -22,8 +22,11 @@ const (
 )
 
 var (
-	CatRaces []interface{} = []interface{}{Persian, MaineCoon, Siamese, Ragdoll, Bengal, Sphynx, BritishShorthair, Abyssinian, ScottishFold, Birman}
-	CatSexes []interface{} = []interface{}{Male, Female}
+	CatRacesInterface []interface{} = []interface{}{Persian, MaineCoon, Siamese, Ragdoll, Bengal, Sphynx, BritishShorthair, Abyssinian, ScottishFold, Birman}
+	CatSexesInterface []interface{} = []interface{}{Male, Female}
+
+	CatRaces []CatRace = []CatRace{Persian, MaineCoon, Siamese, Ragdoll, Bengal, Sphynx, BritishShorthair, Abyssinian, ScottishFold, Birman}
+	CatSexes []CatSex  = []CatSex{Male, Female}
 )
 
 type Cat struct {

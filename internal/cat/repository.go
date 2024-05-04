@@ -4,12 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/citadel-corp/cats-social/internal/common/db"
 	"github.com/lib/pq"
 )
 
 type Repository interface {
+	List(ctx context.Context, req ListCatPayload, userID int) ([]*Cat, error)
 	GetByUIDAndUserID(ctx context.Context, id string, userID int) (*Cat, error)
 	GetByIDAndUserID(ctx context.Context, id int64, userID int) (*Cat, error)
 	GetByUID(ctx context.Context, uid string) (*Cat, error)
@@ -79,6 +82,81 @@ func (d *dbRepository) GetByUID(ctx context.Context, uid string) (*Cat, error) {
 		return nil, err
 	}
 	return cat, nil
+}
+
+// List implements Repository.
+func (d *dbRepository) List(ctx context.Context, req ListCatPayload, userID int) ([]*Cat, error) {
+	paramNo := 1
+	listQuery := "SELECT * FROM cats WHERE "
+	params := make([]interface{}, 0)
+	if req.ID != "" {
+		listQuery += fmt.Sprintf("uid = $%d AND ", paramNo)
+		paramNo += 1
+		params = append(params, req.ID)
+	}
+	if req.Race != "" {
+		listQuery += fmt.Sprintf("race = $%d AND ", paramNo)
+		paramNo += 1
+		params = append(params, req.Race)
+	}
+	if req.Sex != "" {
+		listQuery += fmt.Sprintf("sex = $%d AND ", paramNo)
+		paramNo += 1
+		params = append(params, req.Sex)
+	}
+	switch req.HasMatchedType {
+	case HasMatched:
+		listQuery += fmt.Sprintf("has_matched = $%d AND ", paramNo)
+		paramNo += 1
+		params = append(params, true)
+	case HasNotMatched:
+		listQuery += fmt.Sprintf("has_matched = $%d AND ", paramNo)
+		paramNo += 1
+		params = append(params, false)
+	}
+	switch req.AgeSearchType {
+	case MoreThan:
+		listQuery += fmt.Sprintf("age_in_month > $%d AND ", paramNo)
+		paramNo += 1
+		params = append(params, req.Age)
+	case LessThan:
+		listQuery += fmt.Sprintf("age_in_month < $%d AND ", paramNo)
+		paramNo += 1
+		params = append(params, req.Age)
+	case EqualTo:
+		listQuery += fmt.Sprintf("age_in_month = $%d AND ", paramNo)
+		paramNo += 1
+		params = append(params, req.Age)
+	}
+
+	if req.Owned {
+		listQuery += fmt.Sprintf("user_id = $%d AND ", paramNo)
+		params = append(params, userID)
+	}
+	if req.Search != "" {
+		listQuery += fmt.Sprintf("name LIKE '%%%s%%' AND ", req.Search)
+	}
+	if strings.HasSuffix(listQuery, "AND ") {
+		listQuery, _ = strings.CutSuffix(listQuery, "AND ")
+	}
+	listQuery += fmt.Sprintf(" ORDER BY created_at DESC LIMIT %d OFFSET %d;", req.Limit, req.Offset)
+	if strings.Contains(listQuery, "WHERE  ORDER") {
+		listQuery = strings.Replace(listQuery, "WHERE  ORDER", "ORDER", 1)
+	}
+	rows, err := d.db.DB().QueryContext(ctx, listQuery, params...)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]*Cat, 0)
+	for rows.Next() {
+		cat := &Cat{}
+		err = rows.Scan(&cat.ID, &cat.UID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), &cat.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, cat)
+	}
+	return res, nil
 }
 
 // Create implements Repository.
