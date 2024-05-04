@@ -10,7 +10,7 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, user *User) error
+	Create(ctx context.Context, user *User) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	GetByID(ctx context.Context, id uint64) (*User, error)
 }
@@ -24,28 +24,34 @@ func NewRepository(db *db.DB) Repository {
 }
 
 // Create implements Repository.
-func (d *dbRepository) Create(ctx context.Context, user *User) error {
+func (d *dbRepository) Create(ctx context.Context, user *User) (*User, error) {
 	createUserQuery := `
 		INSERT INTO users (
 			uid, email, name, hashed_password
 		) VALUES (
 			$1, $2, $3, $4
-		);
+		) RETURNING id;
 	`
-	_, err := d.db.DB().ExecContext(ctx, createUserQuery, user.UID, user.Email, user.Name, user.HashedPassword)
+	row := d.db.DB().QueryRowContext(ctx, createUserQuery, user.UID, user.Email, user.Name, user.HashedPassword)
+	u := &User{}
+	err := row.Scan(&u.ID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrUserNotFound
+	}
+
 	var pgErr *pgconn.PgError
 	if err != nil {
 		if errors.As(err, &pgErr) {
 			switch pgErr.Code {
 			case "23505":
-				return ErrEmailAlreadyExists
+				return nil, ErrEmailAlreadyExists
 			default:
-				return err
+				return nil, err
 			}
 		}
-		return err
+		return nil, err
 	}
-	return nil
+	return u, nil
 }
 
 func (d *dbRepository) GetByEmail(ctx context.Context, email string) (*User, error) {

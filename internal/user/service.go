@@ -38,7 +38,7 @@ func (s *userService) Create(ctx context.Context, req CreateUserPayload) (*UserR
 		Name:           req.Name,
 		HashedPassword: hashedPassword,
 	}
-	err = s.repository.Create(ctx, user)
+	user, err = s.repository.Create(ctx, user)
 	if err != nil {
 		return nil, err
 	}

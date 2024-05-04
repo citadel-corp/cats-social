@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/citadel-corp/cats-social/internal/cat"
+	catmatch "github.com/citadel-corp/cats-social/internal/cat_match"
 	"github.com/citadel-corp/cats-social/internal/common/db"
 	"github.com/citadel-corp/cats-social/internal/common/middleware"
 	"github.com/citadel-corp/cats-social/internal/user"
@@ -61,6 +62,11 @@ func main() {
 	catService := cat.NewService(catRepository)
 	catHandler := cat.NewHandler(catService)
 
+	// initialize cat match domain
+	catMatchRepository := catmatch.NewRepository(db)
+	catMatchService := catmatch.NewService(catMatchRepository, catRepository)
+	catMatchHandler := catmatch.NewHandler(catMatchService)
+
 	r := mux.NewRouter()
 	r.Use(middleware.Logging)
 	r.Use(middleware.PanicRecoverer)
@@ -75,6 +81,10 @@ func main() {
 	ur := v1.PathPrefix("/user").Subrouter()
 	ur.HandleFunc("/register", userHandler.CreateUser).Methods(http.MethodPost)
 	ur.HandleFunc("/login", userHandler.Login).Methods(http.MethodPost)
+
+	// cat match routes
+	cmr := v1.PathPrefix("/cat/match").Subrouter()
+	cmr.HandleFunc("", middleware.Authorized(catMatchHandler.Create)).Methods(http.MethodPost)
 
 	// cat management routes
 	cr := v1.PathPrefix("/cat").Subrouter()
