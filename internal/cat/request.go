@@ -24,13 +24,13 @@ type CreateUpdateCatPayload struct {
 func (p CreateUpdateCatPayload) Validate() error {
 	for i := range p.ImageURLS {
 		if len(p.ImageURLS[i]) == 0 {
-			return errors.New("tags must not be empty")
+			return errors.New("image urls must not be empty")
 		}
 	}
 	return validation.ValidateStruct(&p,
 		validation.Field(&p.Name, validation.Required, validation.Length(1, 30)),
 		validation.Field(&p.Race, validation.Required, validation.Length(5, 15), validation.In(CatRacesInterface...)),
-		validation.Field(&p.Sex, validation.Required, validation.Length(5, 15), validation.In(CatSexesInterface...)),
+		validation.Field(&p.Sex, validation.Required, validation.In(CatSexesInterface...)),
 		validation.Field(&p.AgeInMonth, validation.Required, validation.Min(1), validation.Max(120082)),
 		validation.Field(&p.Description, validation.Required, validation.Length(1, 200)),
 		validation.Field(&p.ImageURLS, validation.Required, validation.Length(1, 0), validation.Each(validation.Required, validation.NotNil, imgUrlValidationRule)),

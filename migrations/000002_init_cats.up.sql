@@ -7,8 +7,9 @@ CREATE TYPE cats_sex AS ENUM('female', 'male');
 
 CREATE TABLE IF NOT EXISTS
 cats (
-    id CHAR(16) PRIMARY KEY,
-    user_id CHAR(16) NOT NULL,
+    id SERIAL PRIMARY KEY,
+    uid CHAR(16) UNIQUE NOT NULL,
+    user_id INT NOT NULL,
     name VARCHAR NOT NULL,
 	race cats_race NOT NULL,
 	sex cats_sex NOT NULL,
@@ -22,10 +23,10 @@ cats (
 ALTER TABLE cats
 	ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+CREATE INDEX IF NOT EXISTS cats_uid
+	ON cats USING HASH (uid);
 CREATE INDEX IF NOT EXISTS cats_name
 	ON cats (name);
-CREATE INDEX IF NOT EXISTS cats_user_id
-	ON cats USING HASH (user_id);
 CREATE INDEX IF NOT EXISTS cats_race_idx
 	ON cats(race);
 CREATE INDEX IF NOT EXISTS cats_sex_idx

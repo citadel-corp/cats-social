@@ -30,8 +30,9 @@ var (
 )
 
 type Cat struct {
-	ID          string
-	UserID      string
+	ID          int64
+	UID         string
+	UserID      int
 	Name        string
 	Race        CatRace
 	Sex         CatSex

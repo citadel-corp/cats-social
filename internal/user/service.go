@@ -33,7 +33,7 @@ func (s *userService) Create(ctx context.Context, req CreateUserPayload) (*UserR
 		return nil, err
 	}
 	user := &User{
-		ID:             id.GenerateStringID(16),
+		UID:            id.GenerateStringID(16),
 		Email:          req.Email,
 		Name:           req.Name,
 		HashedPassword: hashedPassword,

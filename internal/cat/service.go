@@ -16,10 +16,10 @@ var (
 )
 
 type Service interface {
-	List(ctx context.Context, req ListCatPayload, userID string) ([]CatResponse, error)
-	Create(ctx context.Context, req CreateUpdateCatPayload, userID string) (*CreateCatResponse, error)
-	Update(ctx context.Context, req CreateUpdateCatPayload, id string, userID string) error
-	Delete(ctx context.Context, id string, userID string) error
+	List(ctx context.Context, req ListCatPayload, userID int) ([]CatResponse, error)
+	Create(ctx context.Context, req CreateUpdateCatPayload, userID int) (*CreateCatResponse, error)
+	Update(ctx context.Context, req CreateUpdateCatPayload, id string, userID int) error
+	Delete(ctx context.Context, id string, userID int) error
 }
 
 type userService struct {
@@ -31,7 +31,7 @@ func NewService(repository Repository) Service {
 }
 
 // List implements Service.
-func (s *userService) List(ctx context.Context, req ListCatPayload, userID string) ([]CatResponse, error) {
+func (s *userService) List(ctx context.Context, req ListCatPayload, userID int) ([]CatResponse, error) {
 	// validate payload; if invalid, set to empty so it will be ignored when querying
 	if req.Limit == 0 {
 		req.Limit = 5
@@ -74,7 +74,7 @@ func (s *userService) List(ctx context.Context, req ListCatPayload, userID strin
 	res := make([]CatResponse, len(cats))
 	for i, cat := range cats {
 		res[i] = CatResponse{
-			ID:          cat.ID,
+			ID:          cat.UID,
 			Name:        cat.Name,
 			Race:        string(cat.Race),
 			Sex:         string(cat.Sex),
@@ -88,13 +88,13 @@ func (s *userService) List(ctx context.Context, req ListCatPayload, userID strin
 	return res, nil
 }
 
-func (s *userService) Create(ctx context.Context, req CreateUpdateCatPayload, userID string) (*CreateCatResponse, error) {
+func (s *userService) Create(ctx context.Context, req CreateUpdateCatPayload, userID int) (*CreateCatResponse, error) {
 	err := req.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrValidationFailed, err)
 	}
 	cat := &Cat{
-		ID:          id.GenerateStringID(16),
+		UID:         id.GenerateStringID(16),
 		UserID:      userID,
 		Name:        req.Name,
 		Race:        CatRace(req.Race),
@@ -109,18 +109,18 @@ func (s *userService) Create(ctx context.Context, req CreateUpdateCatPayload, us
 		return nil, err
 	}
 	return &CreateCatResponse{
-		Id:        cat.ID,
+		Id:        cat.UID,
 		CreatedAt: cat.CreatedAt,
 	}, nil
 }
 
 // Update implements Service.
-func (s *userService) Update(ctx context.Context, req CreateUpdateCatPayload, id string, userID string) error {
+func (s *userService) Update(ctx context.Context, req CreateUpdateCatPayload, uid string, userID int) error {
 	err := req.Validate()
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrValidationFailed, err)
 	}
-	cat, err := s.repository.GetByIDAndUserID(ctx, id, userID)
+	cat, err := s.repository.GetByUIDAndUserID(ctx, uid, userID)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func (s *userService) Update(ctx context.Context, req CreateUpdateCatPayload, id
 	}
 
 	cat = &Cat{
-		ID:          id,
+		UID:         uid,
 		UserID:      userID,
 		Name:        req.Name,
 		Race:        req.Race,
@@ -145,6 +145,6 @@ func (s *userService) Update(ctx context.Context, req CreateUpdateCatPayload, id
 }
 
 // Delete implements Service.
-func (s *userService) Delete(ctx context.Context, id string, userID string) error {
+func (s *userService) Delete(ctx context.Context, id string, userID int) error {
 	return s.repository.Delete(ctx, id, userID)
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/citadel-corp/cats-social/internal/common/middleware"
 	"github.com/citadel-corp/cats-social/internal/common/request"
@@ -169,11 +170,11 @@ func (h *Handler) DeleteCat(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func getUserID(r *http.Request) (string, error) {
+func getUserID(r *http.Request) (int, error) {
 	if authValue, ok := r.Context().Value(middleware.ContextAuthKey{}).(string); ok {
-		return authValue, nil
+		return strconv.Atoi(authValue)
 	} else {
 		slog.Error("cannot parse auth value from context")
-		return "", errors.New("cannot parse auth value from context")
+		return 0, errors.New("cannot parse auth value from context")
 	}
 }
