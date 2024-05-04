@@ -32,7 +32,7 @@ var (
 type Cat struct {
 	ID          int64
 	UID         string
-	UserID      int
+	UserID      int64
 	Name        string
 	Race        CatRace
 	Sex         CatSex

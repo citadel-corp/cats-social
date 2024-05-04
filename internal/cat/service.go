@@ -16,10 +16,10 @@ var (
 )
 
 type Service interface {
-	List(ctx context.Context, req ListCatPayload, userID int) ([]CatResponse, error)
-	Create(ctx context.Context, req CreateUpdateCatPayload, userID int) (*CreateCatResponse, error)
-	Update(ctx context.Context, req CreateUpdateCatPayload, id string, userID int) error
-	Delete(ctx context.Context, id string, userID int) error
+	List(ctx context.Context, req ListCatPayload, userID int64) ([]CatResponse, error)
+	Create(ctx context.Context, req CreateUpdateCatPayload, userID int64) (*CreateCatResponse, error)
+	Update(ctx context.Context, req CreateUpdateCatPayload, id string, userID int64) error
+	Delete(ctx context.Context, id string, userID int64) error
 }
 
 type userService struct {
@@ -31,7 +31,7 @@ func NewService(repository Repository) Service {
 }
 
 // List implements Service.
-func (s *userService) List(ctx context.Context, req ListCatPayload, userID int) ([]CatResponse, error) {
+func (s *userService) List(ctx context.Context, req ListCatPayload, userID int64) ([]CatResponse, error) {
 	// validate payload; if invalid, set to empty so it will be ignored when querying
 	if req.Limit == 0 {
 		req.Limit = 5
@@ -88,7 +88,7 @@ func (s *userService) List(ctx context.Context, req ListCatPayload, userID int) 
 	return res, nil
 }
 
-func (s *userService) Create(ctx context.Context, req CreateUpdateCatPayload, userID int) (*CreateCatResponse, error) {
+func (s *userService) Create(ctx context.Context, req CreateUpdateCatPayload, userID int64) (*CreateCatResponse, error) {
 	err := req.Validate()
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrValidationFailed, err)
@@ -115,7 +115,7 @@ func (s *userService) Create(ctx context.Context, req CreateUpdateCatPayload, us
 }
 
 // Update implements Service.
-func (s *userService) Update(ctx context.Context, req CreateUpdateCatPayload, uid string, userID int) error {
+func (s *userService) Update(ctx context.Context, req CreateUpdateCatPayload, uid string, userID int64) error {
 	err := req.Validate()
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrValidationFailed, err)
@@ -145,6 +145,6 @@ func (s *userService) Update(ctx context.Context, req CreateUpdateCatPayload, ui
 }
 
 // Delete implements Service.
-func (s *userService) Delete(ctx context.Context, id string, userID int) error {
+func (s *userService) Delete(ctx context.Context, id string, userID int64) error {
 	return s.repository.Delete(ctx, id, userID)
 }
