@@ -1,8 +1,22 @@
 package catmatch
 
-// type CatMatchAndCats struct {
-// 	CatMatchID   int64  `json:"cat_match_id"`
-// 	CatMatchUID  string `json:"cat_match_uid"`
-// 	IssuerCatId  int64  `json:"issuer_cat_id"`
-// 	MatchedCatId int64  `json:"matched_cat_id"`
-// }
+import (
+	"time"
+
+	"github.com/citadel-corp/cats-social/internal/cat"
+)
+
+type CatMatchResponse struct {
+	ID             string          `json:"id"`
+	IssuedBy       Issuer          `json:"issuedBy"`
+	MatchCatDetail cat.CatResponse `json:"matchCatDetail"`
+	UserCatDetail  cat.CatResponse `json:"userCatDetail"`
+	Message        string          `json:"message"`
+	CreatedAt      time.Time       `json:"createdAt"`
+}
+
+type Issuer struct {
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"createdAt"`
+}

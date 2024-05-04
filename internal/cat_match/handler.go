@@ -144,6 +144,27 @@ func (h *Handler) Approve(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) GetCatMatchList(w http.ResponseWriter, r *http.Request) {
+	userID, err := getUserID(r)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, response.ResponseBody{})
+		return
+	}
+
+	cats, err := h.service.List(r.Context(), userID)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, response.ResponseBody{
+			Message: "Internal server error",
+			Error:   err.Error(),
+		})
+		return
+	}
+	response.JSON(w, http.StatusOK, response.ResponseBody{
+		Message: "success",
+		Data:    cats,
+	})
+}
+
 func getUserID(r *http.Request) (int64, error) {
 	if authValue, ok := r.Context().Value(middleware.ContextAuthKey{}).(string); ok {
 		return strconv.ParseInt(authValue, 10, 64)

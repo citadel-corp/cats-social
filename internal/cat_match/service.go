@@ -10,6 +10,7 @@ import (
 type Service interface {
 	Create(ctx context.Context, req PostCatMatch, userID int64) error
 	Approve(ctx context.Context, req ApproveOrRejectMatch, userId int64) error
+	List(ctx context.Context, userID int64) ([]CatMatchResponse, error)
 }
 
 type catMatchService struct {
@@ -83,4 +84,24 @@ func (s *catMatchService) Approve(ctx context.Context, req ApproveOrRejectMatch,
 	}
 
 	return nil
+}
+
+// List implements Service.
+func (s *catMatchService) List(ctx context.Context, userID int64) ([]CatMatchResponse, error) {
+	catMatches, err := s.repository.List(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]CatMatchResponse, len(catMatches))
+	for i, catMatch := range catMatches {
+		res[i] = CatMatchResponse{
+			ID:             catMatch.UID,
+			IssuedBy:       Issuer{},          // todo
+			MatchCatDetail: cat.CatResponse{}, // todo
+			UserCatDetail:  cat.CatResponse{}, // todo
+			Message:        catMatch.Message,
+			CreatedAt:      *catMatch.CreatedAt,
+		}
+	}
+	return res, nil
 }
