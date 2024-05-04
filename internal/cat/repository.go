@@ -51,6 +51,11 @@ func (d *dbRepository) List(ctx context.Context, req ListCatPayload, userID int)
 	paramNo := 1
 	listQuery := "SELECT * FROM cats WHERE "
 	params := make([]interface{}, 0)
+	if req.ID != "" {
+		listQuery += fmt.Sprintf("uid = $%d AND ", paramNo)
+		paramNo += 1
+		params = append(params, req.ID)
+	}
 	if req.Race != "" {
 		listQuery += fmt.Sprintf("race = $%d AND ", paramNo)
 		paramNo += 1
@@ -88,12 +93,10 @@ func (d *dbRepository) List(ctx context.Context, req ListCatPayload, userID int)
 
 	if req.Owned {
 		listQuery += fmt.Sprintf("user_id = $%d AND ", paramNo)
-		paramNo += 1
 		params = append(params, userID)
 	}
 	if req.Search != "" {
-		listQuery += fmt.Sprintf("name LIKE %%$%d%% AND ", paramNo)
-		params = append(params, req.Search)
+		listQuery += fmt.Sprintf("name LIKE '%%%s%%' AND ", req.Search)
 	}
 	if strings.HasSuffix(listQuery, "AND ") {
 		listQuery, _ = strings.CutSuffix(listQuery, "AND ")

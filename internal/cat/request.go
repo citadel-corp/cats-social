@@ -38,7 +38,7 @@ func (p CreateUpdateCatPayload) Validate() error {
 }
 
 type ListCatPayload struct {
-	ID         int    `schema:"id" binding:"omitempty"`
+	ID         string `schema:"id" binding:"omitempty"`
 	Limit      int    `schema:"limit" binding:"omitempty"`
 	Offset     int    `schema:"offset" binding:"omitempty"`
 	Race       string `schema:"race" binding:"omitempty"`
