@@ -166,3 +166,18 @@ func (d *dbRepository) Delete(ctx context.Context, id int64, userId int64) error
 
 	return nil
 }
+
+// List implements Repository.
+func (d *dbRepository) List(ctx context.Context, userID int64) ([]*CatMatches, error) {
+	_ = `
+		SELECT cm.*, ic.*, mc.*, u.*
+		FROM cat_matches cm
+		LEFT JOIN cats ic on cm.issuer_user_id = ic.user_id
+		LEFT JOIN cats mc on cm.matched_user_id = mc.user_id
+		LEFT JOIN users u on cm.issuer_user_id = u.id
+		WHERE cm.issuer_user_id = $1
+	`
+	// todo lanjutkan
+
+	return nil, nil
+}
