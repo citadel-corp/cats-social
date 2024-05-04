@@ -78,6 +78,7 @@ func main() {
 
 	// cat management routes
 	cr := v1.PathPrefix("/cat").Subrouter()
+	cr.HandleFunc("", middleware.Authorized(catHandler.GetCatList)).Methods(http.MethodGet)
 	cr.HandleFunc("", middleware.Authorized(catHandler.CreateCat)).Methods(http.MethodPost)
 	cr.HandleFunc("/{id}", middleware.Authorized(catHandler.UpdateCat)).Methods(http.MethodPut)
 	cr.HandleFunc("/{id}", middleware.Authorized(catHandler.DeleteCat)).Methods(http.MethodDelete)

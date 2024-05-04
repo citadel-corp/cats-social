@@ -29,10 +29,46 @@ func (p CreateUpdateCatPayload) Validate() error {
 	}
 	return validation.ValidateStruct(&p,
 		validation.Field(&p.Name, validation.Required, validation.Length(1, 30)),
-		validation.Field(&p.Race, validation.Required, validation.Length(5, 15), validation.In(CatRaces...)),
-		validation.Field(&p.Sex, validation.Required, validation.Length(5, 15), validation.In(CatSexes...)),
+		validation.Field(&p.Race, validation.Required, validation.Length(5, 15), validation.In(CatRacesInterface...)),
+		validation.Field(&p.Sex, validation.Required, validation.Length(5, 15), validation.In(CatSexesInterface...)),
 		validation.Field(&p.AgeInMonth, validation.Required, validation.Min(1), validation.Max(120082)),
 		validation.Field(&p.Description, validation.Required, validation.Length(1, 200)),
 		validation.Field(&p.ImageURLS, validation.Required, validation.Length(1, 0), validation.Each(validation.Required, validation.NotNil, imgUrlValidationRule)),
 	)
 }
+
+type ListCatPayload struct {
+	ID         int    `schema:"id" binding:"omitempty"`
+	Limit      int    `schema:"limit" binding:"omitempty"`
+	Offset     int    `schema:"offset" binding:"omitempty"`
+	Race       string `schema:"race" binding:"omitempty"`
+	Sex        string `schema:"sex" binding:"omitempty"`
+	HasMatched string `schema:"hasMatched" binding:"omitempty"`
+	AgeInMonth string `schema:"ageInMonth" binding:"omitempty"`
+	Owned      bool   `schema:"owned" binding:"omitempty"`
+	Search     string `schema:"search" binding:"omitempty"`
+
+	Age            int
+	AgeSearchType  AgeSearchType
+	HasMatchedType HasMatchedSearchType
+}
+
+type AgeSearchType int
+type HasMatchedSearchType int
+type OwnedSearchType int
+
+const (
+	MoreThan AgeSearchType = iota
+	LessThan
+	EqualTo
+	IgnoreAge
+)
+const (
+	HasMatched HasMatchedSearchType = iota
+	HasNotMatched
+	IgnoreHasMatched
+)
+const (
+	Owned OwnedSearchType = iota
+	NotOwned
+)

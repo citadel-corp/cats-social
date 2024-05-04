@@ -9,6 +9,7 @@ import (
 	"github.com/citadel-corp/cats-social/internal/common/request"
 	"github.com/citadel-corp/cats-social/internal/common/response"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 )
 
 type Handler struct {
@@ -17,6 +18,36 @@ type Handler struct {
 
 func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
+}
+
+func (h *Handler) GetCatList(w http.ResponseWriter, r *http.Request) {
+	userID, err := getUserID(r)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, response.ResponseBody{})
+		return
+	}
+
+	newSchema := schema.NewDecoder()
+	newSchema.IgnoreUnknownKeys(true)
+
+	var req ListCatPayload
+	if err = newSchema.Decode(&req, r.URL.Query()); err != nil {
+		response.JSON(w, http.StatusBadRequest, response.ResponseBody{})
+		return
+	}
+
+	cats, err := h.service.List(r.Context(), req, userID)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, response.ResponseBody{
+			Message: "Internal server error",
+			Error:   err.Error(),
+		})
+		return
+	}
+	response.JSON(w, http.StatusOK, response.ResponseBody{
+		Message: "success",
+		Data:    cats,
+	})
 }
 
 func (h *Handler) CreateCat(w http.ResponseWriter, r *http.Request) {
