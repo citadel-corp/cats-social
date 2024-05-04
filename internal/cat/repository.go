@@ -11,6 +11,8 @@ import (
 
 type Repository interface {
 	GetByUIDAndUserID(ctx context.Context, id string, userID int) (*Cat, error)
+	GetByIDAndUserID(ctx context.Context, id int64, userID int) (*Cat, error)
+	GetByUID(ctx context.Context, uid string) (*Cat, error)
 	Create(ctx context.Context, cat *Cat) (*Cat, error)
 	Update(ctx context.Context, cat *Cat) error
 	Delete(ctx context.Context, id string, userID int) error
@@ -27,13 +29,49 @@ func NewRepository(db *db.DB) Repository {
 // GetByIDAndUserID implements Repository.
 func (d *dbRepository) GetByUIDAndUserID(ctx context.Context, uid string, userID int) (*Cat, error) {
 	getUserQuery := `
-		SELECT uid, user_id, name, race, sex, age_in_month, description, has_matched, image_urls, created_at
+		SELECT id, uid, user_id, name, race, sex, age_in_month, description, has_matched, image_urls, created_at
 		FROM cats
 		WHERE uid = $1 AND user_id = $2;
 	`
 	row := d.db.DB().QueryRowContext(ctx, getUserQuery, uid, userID)
 	cat := &Cat{}
-	err := row.Scan(&cat.UID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), &cat.CreatedAt)
+	err := row.Scan(&cat.ID, &cat.UID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), &cat.CreatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrCatNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return cat, nil
+}
+
+func (d *dbRepository) GetByIDAndUserID(ctx context.Context, id int64, userID int) (*Cat, error) {
+	getUserQuery := `
+		SELECT id, uid, user_id, name, race, sex, age_in_month, description, has_matched, image_urls, created_at
+		FROM cats
+		WHERE id = $1 AND user_id = $2;
+	`
+	row := d.db.DB().QueryRowContext(ctx, getUserQuery, id, userID)
+	cat := &Cat{}
+	err := row.Scan(&cat.ID, &cat.UID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), &cat.CreatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrCatNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	return cat, nil
+}
+
+func (d *dbRepository) GetByUID(ctx context.Context, uid string) (*Cat, error) {
+	getUserQuery := `
+		SELECT id, uid, user_id, name, race, sex, age_in_month, description, has_matched, image_urls, created_at
+		FROM cats
+		WHERE uid = $1;
+	`
+	row := d.db.DB().QueryRowContext(ctx, getUserQuery, uid)
+	cat := &Cat{}
+	err := row.Scan(&cat.ID, &cat.UID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), &cat.CreatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrCatNotFound
 	}
