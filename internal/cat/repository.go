@@ -109,7 +109,7 @@ func (d *dbRepository) List(ctx context.Context, req ListCatPayload, userID int)
 	res := make([]*Cat, 0)
 	for rows.Next() {
 		cat := &Cat{}
-		err = rows.Scan(&cat.ID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), &cat.CreatedAt)
+		err = rows.Scan(&cat.ID, &cat.UID, &cat.UserID, &cat.Name, &cat.Race, &cat.Sex, &cat.Age, &cat.Description, &cat.HasMatched, pq.Array(&cat.ImageURLS), &cat.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
