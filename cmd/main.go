@@ -98,7 +98,7 @@ func main() {
 	cr.HandleFunc("/{id}", middleware.Authorized(catHandler.DeleteCat)).Methods(http.MethodDelete)
 
 	httpServer := &http.Server{
-		Addr:     ":8000",
+		Addr:     ":8080",
 		Handler:  r,
 		ErrorLog: slog.NewLogLogger(slogHandler, slog.LevelError),
 	}
