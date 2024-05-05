@@ -11,7 +11,7 @@ type Service interface {
 	Create(ctx context.Context, req PostCatMatch, userID int64) error
 	Approve(ctx context.Context, req ApproveOrRejectMatch, userId int64) error
 	Reject(ctx context.Context, req ApproveOrRejectMatch, userId int64) error
-	Delete(ctx context.Context, req DeleteMatch, userId int64) error
+	Delete(ctx context.Context, id string, userId int64) error
 	List(ctx context.Context, userID int64) ([]CatMatchResponse, error)
 }
 
@@ -106,12 +106,12 @@ func (s *catMatchService) Reject(ctx context.Context, req ApproveOrRejectMatch, 
 	return nil
 }
 
-func (s *catMatchService) Delete(ctx context.Context, req DeleteMatch, userId int64) error {
+func (s *catMatchService) Delete(ctx context.Context, id string, userId int64) error {
 	// get match
 	filter := map[string]interface{}{
 		"pending_only": true,
 	}
-	match, err := s.repository.GetByUIDAndUserID(ctx, req.MatchUID, userId, filter)
+	match, err := s.repository.GetByUIDAndUserID(ctx, id, userId, filter)
 	if err != nil {
 		return err
 	}

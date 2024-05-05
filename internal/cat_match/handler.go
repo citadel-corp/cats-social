@@ -10,6 +10,7 @@ import (
 	"github.com/citadel-corp/cats-social/internal/common/middleware"
 	"github.com/citadel-corp/cats-social/internal/common/request"
 	"github.com/citadel-corp/cats-social/internal/common/response"
+	"github.com/gorilla/mux"
 )
 
 type Handler struct {
@@ -206,27 +207,10 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req DeleteMatch
+	params := mux.Vars(r)
+	id := params["id"]
 
-	err = request.DecodeJSON(w, r, &req)
-	if err != nil {
-		response.JSON(w, http.StatusBadRequest, response.ResponseBody{
-			Message: "Failed to decode JSON",
-			Error:   err.Error(),
-		})
-		return
-	}
-
-	err = req.Validate()
-	if err != nil {
-		response.JSON(w, http.StatusBadRequest, response.ResponseBody{
-			Message: "Bad request",
-			Error:   err.Error(),
-		})
-		return
-	}
-
-	err = h.service.Delete(r.Context(), req, userID)
+	err = h.service.Delete(r.Context(), id, userID)
 	if errors.Is(err, ErrCatMatchNoLongerValid) {
 		response.JSON(w, http.StatusBadRequest, response.ResponseBody{
 			Message: "Bad request",
@@ -249,7 +233,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	response.JSON(w, http.StatusCreated, response.ResponseBody{
+	response.JSON(w, http.StatusOK, response.ResponseBody{
 		Message: "success",
 	})
 }

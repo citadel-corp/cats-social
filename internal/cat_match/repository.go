@@ -118,7 +118,7 @@ func (d *dbRepository) GetByUIDAndUserID(ctx context.Context, uid string, userID
 	getMatchQuery := `
 		SELECT id, uid, issuer_cat_id, issuer_user_id, matched_cat_id, matched_user_id, message, approval_status
 		FROM cat_matches
-		WHERE uid = $1 AND matched_user_id = $2;
+		WHERE uid = $1 AND issuer_user_id = $2;
 	`
 
 	row := d.db.DB().QueryRowContext(ctx, getMatchQuery, uid, userID)
@@ -156,27 +156,28 @@ func (d *dbRepository) Delete(ctx context.Context, id int64, userId int64) error
 // List implements Repository.
 func (d *dbRepository) List(ctx context.Context, userID int64, filter map[string]interface{}) ([]CatMatchList, error) {
 	listQuery := `
-		SELECT cm.id, cm.message,
-		ic.uid, ic.name, ic.race, ic.sex, ic.description, ic.age_in_month, 
+		SELECT cm.uid, cm.message,
+		ic.uid, ic.name, ic.race, ic.sex, ic.description, ic.age_in_month,
 		ic.image_urls, ic.has_matched, ic.created_at,
-		mc.uid, mc.name, mc.race, mc.sex, mc.description, mc.age_in_month, 
+		mc.uid, mc.name, mc.race, mc.sex, mc.description, mc.age_in_month,
 		mc.image_urls, mc.has_matched, mc.created_at,
 		u.id, u.name, u.email, u.created_at
 		FROM cat_matches cm
 		LEFT JOIN cats ic on cm.issuer_cat_id = ic.id
 		LEFT JOIN cats mc on cm.matched_cat_id = mc.id
 		LEFT JOIN users u on cm.issuer_user_id = u.id
-		WHERE (cm.issuer_user_id = $1 OR cm.matched_user_id = $1) AND cm.approval_status = $2
+		WHERE (cm.issuer_user_id = $1 OR cm.matched_user_id = $1)
+		ORDER BY cm.created_at desc;
 	`
 
-	var approvalStatus MatchStatus
-	if v, ok := filter["approval_status"].(MatchStatus); ok {
-		approvalStatus = v
-	} else {
-		approvalStatus = Approved
-	}
+	// var approvalStatus MatchStatus
+	// if v, ok := filter["approval_status"].(MatchStatus); ok {
+	// 	approvalStatus = v
+	// } else {
+	// 	approvalStatus = Approved
+	// }
 
-	rows, err := d.db.DB().QueryContext(ctx, listQuery, userID, approvalStatus)
+	rows, err := d.db.DB().QueryContext(ctx, listQuery, userID)
 	if err != nil {
 		return nil, err
 	}
