@@ -87,6 +87,8 @@ func main() {
 	cmr.HandleFunc("", middleware.Authorized(catMatchHandler.GetCatMatchList)).Methods(http.MethodGet)
 	cmr.HandleFunc("", middleware.Authorized(catMatchHandler.Create)).Methods(http.MethodPost)
 	cmr.HandleFunc("/approve", middleware.Authorized(catMatchHandler.Approve)).Methods(http.MethodPost)
+	cmr.HandleFunc("/reject", middleware.Authorized(catMatchHandler.Reject)).Methods(http.MethodPost)
+	cmr.HandleFunc("/{id}", middleware.Authorized(catMatchHandler.Delete)).Methods(http.MethodDelete)
 
 	// cat management routes
 	cr := v1.PathPrefix("/cat").Subrouter()

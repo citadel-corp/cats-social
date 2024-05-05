@@ -11,6 +11,8 @@ import (
 type Repository interface {
 	Create(ctx context.Context, catMatch *CatMatches) error
 	Approve(ctx context.Context, catMatch *CatMatches) error
+	Reject(ctx context.Context, catMatch *CatMatches) error
+	Delete(ctx context.Context, id int64, userId int64) error
 	// GetByCatID(ctx context.Context, catID int64) (*CatMatches, error)
 	GetByUIDAndUserID(ctx context.Context, uid string, userID int64, filter map[string]interface{}) (*CatMatches, error)
 	// GetMatchingCats(ctx context.Context, matchUid string) (*CatMatchAndCats, error)
@@ -96,6 +98,21 @@ func (d *dbRepository) Approve(ctx context.Context, catMatch *CatMatches) error 
 	return err
 }
 
+func (d *dbRepository) Reject(ctx context.Context, catMatch *CatMatches) error {
+	updateMatchQuery := `
+		UPDATE cat_matches
+		SET approval_status = $1
+		WHERE id = $2;
+	`
+
+	_, err := d.db.DB().ExecContext(ctx, updateMatchQuery, Rejected, catMatch.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *dbRepository) GetByUIDAndUserID(ctx context.Context, uid string, userID int64, filter map[string]interface{}) (*CatMatches, error) {
 	getMatchQuery := `
 		SELECT id, uid, issuer_cat_id, issuer_user_id, matched_cat_id, matched_user_id, message, approval_status
@@ -134,4 +151,18 @@ func (d *dbRepository) List(ctx context.Context, userID int64) ([]*CatMatches, e
 	// todo lanjutkan
 
 	return nil, nil
+}
+
+func (d *dbRepository) Delete(ctx context.Context, id int64, userId int64) error {
+	deleteMatchQuery := `
+		DELETE FROM cat_matches
+		WHERE id = $1 AND issuer_user_id = $2;
+	`
+
+	_, err := d.db.DB().ExecContext(ctx, deleteMatchQuery, id, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
