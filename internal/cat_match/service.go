@@ -13,6 +13,8 @@ type Service interface {
 	Reject(ctx context.Context, req ApproveOrRejectMatch, userId int64) error
 	Delete(ctx context.Context, req DeleteMatch, userId int64) error
 	List(ctx context.Context, userID int64) ([]CatMatchResponse, error)
+	Reject(ctx context.Context, req ApproveOrRejectMatch, userId int64) error
+	Delete(ctx context.Context, req DeleteMatch, userId int64) error
 }
 
 type catMatchService struct {
@@ -142,4 +144,40 @@ func (s *catMatchService) List(ctx context.Context, userID int64) ([]CatMatchRes
 		}
 	}
 	return res, nil
+}
+
+func (s *catMatchService) Reject(ctx context.Context, req ApproveOrRejectMatch, userId int64) error {
+	// get match
+	filter := map[string]interface{}{
+		"pending_only": true,
+	}
+	match, err := s.repository.GetByUIDAndUserID(ctx, req.MatchUID, userId, filter)
+	if err != nil {
+		return err
+	}
+
+	err = s.repository.Reject(ctx, match)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *catMatchService) Delete(ctx context.Context, req DeleteMatch, userId int64) error {
+	// get match
+	filter := map[string]interface{}{
+		"pending_only": true,
+	}
+	match, err := s.repository.GetByUIDAndUserID(ctx, req.MatchUID, userId, filter)
+	if err != nil {
+		return err
+	}
+
+	err = s.repository.Delete(ctx, match.ID, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

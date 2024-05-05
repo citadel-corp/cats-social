@@ -166,3 +166,17 @@ func (d *dbRepository) List(ctx context.Context, userID int64) ([]*CatMatches, e
 
 	return nil, nil
 }
+
+func (d *dbRepository) Delete(ctx context.Context, id int64, userId int64) error {
+	deleteMatchQuery := `
+		DELETE FROM cat_matches
+		WHERE id = $1 AND issuer_user_id = $2;
+	`
+
+	_, err := d.db.DB().ExecContext(ctx, deleteMatchQuery, id, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

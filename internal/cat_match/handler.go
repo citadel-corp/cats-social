@@ -255,12 +255,14 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetCatMatchList(w http.ResponseWriter, r *http.Request) {
+
 	userID, err := getUserID(r)
 	if err != nil {
 		response.JSON(w, http.StatusInternalServerError, response.ResponseBody{})
 		return
 	}
 	cats, err := h.service.List(r.Context(), userID)
+
 	if err != nil {
 		response.JSON(w, http.StatusInternalServerError, response.ResponseBody{
 			Message: "Internal server error",
