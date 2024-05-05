@@ -9,6 +9,7 @@ import (
 
 type Service interface {
 	Create(ctx context.Context, req PostCatMatch, userID int64) error
+	Approve(ctx context.Context, req ApproveOrRejectMatch, userId int64) error
 }
 
 type catMatchService struct {
@@ -27,7 +28,7 @@ func (s *catMatchService) Create(ctx context.Context, req PostCatMatch, userID i
 	}
 
 	// get issuer cat
-	issuerCat, err := s.catRepository.GetByUIDAndUserID(ctx, req.UserCatId, int(userID))
+	issuerCat, err := s.catRepository.GetByUIDAndUserID(ctx, req.UserCatId, userID)
 	if err != nil {
 		return err
 	}
@@ -59,6 +60,24 @@ func (s *catMatchService) Create(ctx context.Context, req PostCatMatch, userID i
 		Message:     req.Message,
 	}
 	err = s.repository.Create(ctx, catMatch)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *catMatchService) Approve(ctx context.Context, req ApproveOrRejectMatch, userId int64) error {
+	// get match
+	filter := map[string]interface{}{
+		"pending_only": true,
+	}
+	match, err := s.repository.GetByUIDAndUserID(ctx, req.MatchUID, userId, filter)
+	if err != nil {
+		return err
+	}
+
+	err = s.repository.Approve(ctx, match)
 	if err != nil {
 		return err
 	}

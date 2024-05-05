@@ -12,13 +12,13 @@ import (
 )
 
 type Repository interface {
-	List(ctx context.Context, req ListCatPayload, userID int) ([]*Cat, error)
-	GetByUIDAndUserID(ctx context.Context, id string, userID int) (*Cat, error)
-	GetByIDAndUserID(ctx context.Context, id int64, userID int) (*Cat, error)
+	List(ctx context.Context, req ListCatPayload, userID int64) ([]*Cat, error)
+	GetByUIDAndUserID(ctx context.Context, id string, userID int64) (*Cat, error)
+	GetByIDAndUserID(ctx context.Context, id int64, userID int64) (*Cat, error)
 	GetByUID(ctx context.Context, uid string) (*Cat, error)
 	Create(ctx context.Context, cat *Cat) (*Cat, error)
 	Update(ctx context.Context, cat *Cat) error
-	Delete(ctx context.Context, id string, userID int) error
+	Delete(ctx context.Context, id string, userID int64) error
 }
 
 type dbRepository struct {
@@ -30,7 +30,7 @@ func NewRepository(db *db.DB) Repository {
 }
 
 // GetByIDAndUserID implements Repository.
-func (d *dbRepository) GetByUIDAndUserID(ctx context.Context, uid string, userID int) (*Cat, error) {
+func (d *dbRepository) GetByUIDAndUserID(ctx context.Context, uid string, userID int64) (*Cat, error) {
 	getUserQuery := `
 		SELECT id, uid, user_id, name, race, sex, age_in_month, description, has_matched, image_urls, created_at
 		FROM cats
@@ -48,7 +48,7 @@ func (d *dbRepository) GetByUIDAndUserID(ctx context.Context, uid string, userID
 	return cat, nil
 }
 
-func (d *dbRepository) GetByIDAndUserID(ctx context.Context, id int64, userID int) (*Cat, error) {
+func (d *dbRepository) GetByIDAndUserID(ctx context.Context, id int64, userID int64) (*Cat, error) {
 	getUserQuery := `
 		SELECT id, uid, user_id, name, race, sex, age_in_month, description, has_matched, image_urls, created_at
 		FROM cats
@@ -85,7 +85,7 @@ func (d *dbRepository) GetByUID(ctx context.Context, uid string) (*Cat, error) {
 }
 
 // List implements Repository.
-func (d *dbRepository) List(ctx context.Context, req ListCatPayload, userID int) ([]*Cat, error) {
+func (d *dbRepository) List(ctx context.Context, req ListCatPayload, userID int64) ([]*Cat, error) {
 	paramNo := 1
 	listQuery := "SELECT * FROM cats WHERE "
 	params := make([]interface{}, 0)
@@ -200,7 +200,7 @@ func (d *dbRepository) Update(ctx context.Context, cat *Cat) error {
 }
 
 // Delete implements Repository.
-func (d *dbRepository) Delete(ctx context.Context, uid string, userID int) error {
+func (d *dbRepository) Delete(ctx context.Context, uid string, userID int64) error {
 	deleteCatQuery := `
 		DELETE FROM cats
 		WHERE uid = $1 and user_id = $2;

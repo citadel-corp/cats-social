@@ -15,3 +15,13 @@ func (p PostCatMatch) Validate() error {
 		validation.Field(&p.Message, validation.Required, validation.Length(5, 120)),
 	)
 }
+
+type ApproveOrRejectMatch struct {
+	MatchUID string `json:"matchId"`
+}
+
+func (p ApproveOrRejectMatch) Validate() error {
+	return validation.ValidateStruct(&p,
+		validation.Field(&p.MatchUID, validation.Required),
+	)
+}

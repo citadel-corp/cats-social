@@ -170,9 +170,9 @@ func (h *Handler) DeleteCat(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func getUserID(r *http.Request) (int, error) {
+func getUserID(r *http.Request) (int64, error) {
 	if authValue, ok := r.Context().Value(middleware.ContextAuthKey{}).(string); ok {
-		return strconv.Atoi(authValue)
+		return strconv.ParseInt(authValue, 10, 64)
 	} else {
 		slog.Error("cannot parse auth value from context")
 		return 0, errors.New("cannot parse auth value from context")
