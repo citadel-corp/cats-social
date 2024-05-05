@@ -10,7 +10,6 @@ import (
 type Service interface {
 	Create(ctx context.Context, req PostCatMatch, userID int64) error
 	Approve(ctx context.Context, req ApproveOrRejectMatch, userId int64) error
-	List(ctx context.Context, userID int64) ([]CatMatchResponse, error)
 	Reject(ctx context.Context, req ApproveOrRejectMatch, userId int64) error
 	Delete(ctx context.Context, req DeleteMatch, userId int64) error
 	List(ctx context.Context, userID int64) ([]CatMatchResponse, error)
@@ -91,22 +90,13 @@ func (s *catMatchService) Approve(ctx context.Context, req ApproveOrRejectMatch,
 
 // List implements Service.
 func (s *catMatchService) List(ctx context.Context, userID int64) ([]CatMatchResponse, error) {
-	catMatches, err := s.repository.List(ctx, userID)
+	filter := map[string]interface{}{}
+	catMatches, err := s.repository.List(ctx, userID, filter)
 	if err != nil {
 		return nil, err
 	}
-	res := make([]CatMatchResponse, len(catMatches))
-	for i, catMatch := range catMatches {
-		res[i] = CatMatchResponse{
-			ID:             catMatch.UID,
-			IssuedBy:       Issuer{},          // todo
-			MatchCatDetail: cat.CatResponse{}, // todo
-			UserCatDetail:  cat.CatResponse{}, // todo
-			Message:        catMatch.Message,
-			CreatedAt:      *catMatch.CreatedAt,
-		}
-	}
-	return res, nil
+
+	return MakeCatMatchResponse(catMatches, userID), nil
 }
 
 func (s *catMatchService) Reject(ctx context.Context, req ApproveOrRejectMatch, userId int64) error {
@@ -143,24 +133,4 @@ func (s *catMatchService) Delete(ctx context.Context, req DeleteMatch, userId in
 	}
 
 	return nil
-}
-
-// List implements Service.
-func (s *catMatchService) List(ctx context.Context, userID int64) ([]CatMatchResponse, error) {
-	catMatches, err := s.repository.List(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-	res := make([]CatMatchResponse, len(catMatches))
-	for i, catMatch := range catMatches {
-		res[i] = CatMatchResponse{
-			ID:             catMatch.UID,
-			IssuedBy:       Issuer{},          // todo
-			MatchCatDetail: cat.CatResponse{}, // todo
-			UserCatDetail:  cat.CatResponse{}, // todo
-			Message:        catMatch.Message,
-			CreatedAt:      *catMatch.CreatedAt,
-		}
-	}
-	return res, nil
 }
