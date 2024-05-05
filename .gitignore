@@ -24,4 +24,4 @@ go.work
 
 # development config
 .env
-.key
+*.key
