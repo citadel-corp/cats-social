@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/citadel-corp/cats-social/internal/common/db"
+	"github.com/lib/pq"
 )
 
 type Repository interface {
@@ -16,6 +17,7 @@ type Repository interface {
 	// GetByCatID(ctx context.Context, catID int64) (*CatMatches, error)
 	GetByUIDAndUserID(ctx context.Context, uid string, userID int64, filter map[string]interface{}) (*CatMatches, error)
 	// GetMatchingCats(ctx context.Context, matchUid string) (*CatMatchAndCats, error)
+	List(ctx context.Context, userID int64, filter map[string]interface{}) ([]CatMatchList, error)
 }
 
 type dbRepository struct {
@@ -149,4 +151,48 @@ func (d *dbRepository) Delete(ctx context.Context, id int64, userId int64) error
 	}
 
 	return nil
+}
+
+// List implements Repository.
+func (d *dbRepository) List(ctx context.Context, userID int64, filter map[string]interface{}) ([]CatMatchList, error) {
+	listQuery := `
+		SELECT cm.id, cm.message,
+		ic.uid, ic.name, ic.race, ic.sex, ic.description, ic.age_in_month, 
+		ic.image_urls, ic.has_matched, ic.created_at,
+		mc.uid, mc.name, mc.race, mc.sex, mc.description, mc.age_in_month, 
+		mc.image_urls, mc.has_matched, mc.created_at,
+		u.id, u.name, u.email, u.created_at
+		FROM cat_matches cm
+		LEFT JOIN cats ic on cm.issuer_cat_id = ic.id
+		LEFT JOIN cats mc on cm.matched_cat_id = mc.id
+		LEFT JOIN users u on cm.issuer_user_id = u.id
+		WHERE (cm.issuer_user_id = $1 OR cm.matched_user_id = $1) AND cm.approval_status = $2
+	`
+
+	var approvalStatus MatchStatus
+	if v, ok := filter["approval_status"].(MatchStatus); ok {
+		approvalStatus = v
+	} else {
+		approvalStatus = Approved
+	}
+
+	rows, err := d.db.DB().QueryContext(ctx, listQuery, userID, approvalStatus)
+	if err != nil {
+		return nil, err
+	}
+	res := make([]CatMatchList, 0)
+	for rows.Next() {
+		catMatch := CatMatchList{}
+		err = rows.Scan(&catMatch.ID, &catMatch.Message,
+			&catMatch.IssuerCat.ID, &catMatch.IssuerCat.Name, &catMatch.IssuerCat.Race, &catMatch.IssuerCat.Sex, &catMatch.IssuerCat.Description, &catMatch.IssuerCat.AgeInMonth,
+			pq.Array(&catMatch.IssuerCat.ImageUrls), &catMatch.IssuerCat.HasMatched, &catMatch.IssuerCat.CreatedAt,
+			&catMatch.MatchCat.ID, &catMatch.MatchCat.Name, &catMatch.MatchCat.Race, &catMatch.MatchCat.Sex, &catMatch.MatchCat.Description, &catMatch.MatchCat.AgeInMonth,
+			pq.Array(&catMatch.MatchCat.ImageUrls), &catMatch.MatchCat.HasMatched, &catMatch.MatchCat.CreatedAt,
+			&catMatch.IssuedBy.ID, &catMatch.IssuedBy.Name, &catMatch.IssuedBy.Email, &catMatch.IssuedBy.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, catMatch)
+	}
+	return res, nil
 }

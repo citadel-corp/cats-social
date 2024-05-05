@@ -12,6 +12,7 @@ type Service interface {
 	Approve(ctx context.Context, req ApproveOrRejectMatch, userId int64) error
 	Reject(ctx context.Context, req ApproveOrRejectMatch, userId int64) error
 	Delete(ctx context.Context, req DeleteMatch, userId int64) error
+	List(ctx context.Context, userID int64) ([]CatMatchResponse, error)
 }
 
 type catMatchService struct {
@@ -121,4 +122,15 @@ func (s *catMatchService) Delete(ctx context.Context, req DeleteMatch, userId in
 	}
 
 	return nil
+}
+
+// List implements Service.
+func (s *catMatchService) List(ctx context.Context, userID int64) ([]CatMatchResponse, error) {
+	filter := map[string]interface{}{}
+	catMatches, err := s.repository.List(ctx, userID, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return MakeCatMatchResponse(catMatches, userID), nil
 }
