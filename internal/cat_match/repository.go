@@ -156,7 +156,7 @@ func (d *dbRepository) Delete(ctx context.Context, id int64, userId int64) error
 // List implements Repository.
 func (d *dbRepository) List(ctx context.Context, userID int64, filter map[string]interface{}) ([]CatMatchList, error) {
 	listQuery := `
-		SELECT cm.uid, cm.message,
+		SELECT cm.uid, cm.message, cm.created_at,
 		ic.uid, ic.name, ic.race, ic.sex, ic.description, ic.age_in_month,
 		ic.image_urls, ic.has_matched, ic.created_at,
 		mc.uid, mc.name, mc.race, mc.sex, mc.description, mc.age_in_month,
@@ -184,7 +184,7 @@ func (d *dbRepository) List(ctx context.Context, userID int64, filter map[string
 	res := make([]CatMatchList, 0)
 	for rows.Next() {
 		catMatch := CatMatchList{}
-		err = rows.Scan(&catMatch.ID, &catMatch.Message,
+		err = rows.Scan(&catMatch.ID, &catMatch.Message, &catMatch.CreatedAt,
 			&catMatch.IssuerCat.ID, &catMatch.IssuerCat.Name, &catMatch.IssuerCat.Race, &catMatch.IssuerCat.Sex, &catMatch.IssuerCat.Description, &catMatch.IssuerCat.AgeInMonth,
 			pq.Array(&catMatch.IssuerCat.ImageUrls), &catMatch.IssuerCat.HasMatched, &catMatch.IssuerCat.CreatedAt,
 			&catMatch.MatchCat.ID, &catMatch.MatchCat.Name, &catMatch.MatchCat.Race, &catMatch.MatchCat.Sex, &catMatch.MatchCat.Description, &catMatch.MatchCat.AgeInMonth,
