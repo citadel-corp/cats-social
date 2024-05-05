@@ -25,3 +25,13 @@ func (p ApproveOrRejectMatch) Validate() error {
 		validation.Field(&p.MatchUID, validation.Required),
 	)
 }
+
+type DeleteMatch struct {
+	MatchUID string `schema:"id" binding:"omitempty"`
+}
+
+func (p DeleteMatch) Validate() error {
+	return validation.ValidateStruct(&p,
+		validation.Field(&p.MatchUID, validation.Required),
+	)
+}

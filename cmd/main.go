@@ -86,6 +86,8 @@ func main() {
 	cmr := v1.PathPrefix("/cat/match").Subrouter()
 	cmr.HandleFunc("", middleware.Authorized(catMatchHandler.Create)).Methods(http.MethodPost)
 	cmr.HandleFunc("/approve", middleware.Authorized(catMatchHandler.Approve)).Methods(http.MethodPost)
+	cmr.HandleFunc("/reject", middleware.Authorized(catMatchHandler.Reject)).Methods(http.MethodPost)
+	cmr.HandleFunc("/{id}", middleware.Authorized(catMatchHandler.Delete)).Methods(http.MethodDelete)
 
 	// cat management routes
 	cr := v1.PathPrefix("/cat").Subrouter()
@@ -95,7 +97,7 @@ func main() {
 	cr.HandleFunc("/{id}", middleware.Authorized(catHandler.DeleteCat)).Methods(http.MethodDelete)
 
 	httpServer := &http.Server{
-		Addr:     ":8000",
+		Addr:     ":8080",
 		Handler:  r,
 		ErrorLog: slog.NewLogLogger(slogHandler, slog.LevelError),
 	}
